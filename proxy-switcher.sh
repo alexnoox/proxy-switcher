@@ -7,7 +7,10 @@ function setup {
 	echo "export http_proxy=\"http://${proxy}\"" | sudo tee /etc/bash.bashrc -a
 	echo "export https_proxy=\"http://${proxy}\"" | sudo tee /etc/bash.bashrc -a
 	echo "Acquire::http::Proxy \"http://${proxy}\";" | sudo tee /etc/apt/apt.conf.d/proxy -a
-	sudo sed -i "s_Exec=/opt/google/chrome/google-chrome %U_Exec=/opt/google/chrome/google-chrome %U --proxy-server=${proxy}_" /usr/share/applications/google-chrome.desktop
+	if [[ -f /usr/share/applications/google-chrome.desktop ]]
+	then
+		sudo sed -i "s_Exec=/opt/google/chrome/google-chrome %U_Exec=/opt/google/chrome/google-chrome %U --proxy-server=${proxy}_" /usr/share/applications/google-chrome.desktop
+	fi
 	export http_proxy="http://${proxy}"
 	export https_proxy="http://${proxy}"
 }
@@ -20,7 +23,10 @@ function remove {
 	then
 		sudo rm /etc/apt/apt.conf.d/proxy
 	fi
-	sudo sed -i "s_Exec=/opt/google/chrome/google-chrome %U --proxy-server=.*_Exec=/opt/google/chrome/google-chrome %U_" /usr/share/applications/google-chrome.desktop
+	if [[ -f /usr/share/applications/google-chrome.desktop ]]
+	then
+		sudo sed -i "s_Exec=/opt/google/chrome/google-chrome %U --proxy-server=.*_Exec=/opt/google/chrome/google-chrome %U_" /usr/share/applications/google-chrome.desktop
+	fi
 	unset http_proxy
 	unset https_proxy
 }
