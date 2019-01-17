@@ -20,8 +20,8 @@ function setup {
 	fi
 
 	if  [ -x "$(command -v npm)" ]; then
-		npm config set proxy "http://${proxy}"
-		npm config set https-proxy "http://${proxy}"  
+		npm config set proxy "http://${proxy}" --global 
+		npm config set https-proxy "http://${proxy}"  --global 
 	fi
 
 	if  [ -x "$(command -v yarn)" ]; then
@@ -53,8 +53,10 @@ function remove {
 	fi
 
 	if  [ -x "$(command -v npm)" ]; then
-		npm config set proxy ""
-		npm config set https-proxy ""  
+		npm config rm proxy
+		npm config rm https-proxy
+		npm config --global rm proxy
+		npm config --global rm https-proxy
 	fi
 
 	if  [ -x "$(command -v yarn)" ]; then
