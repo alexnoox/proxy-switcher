@@ -13,6 +13,22 @@ function setup {
 	fi
 	export http_proxy="http://${proxy}"
 	export https_proxy="http://${proxy}"
+
+	if  [ -x "$(command -v git)" ]; then
+		git config --global http.proxy "http://${proxy}"
+		git config --global https.proxy "http://${proxy}"
+	fi
+
+	if  [ -x "$(command -v npm)" ]; then
+		npm config set proxy "http://${proxy}"
+		npm config set https-proxy "http://${proxy}"  
+	fi
+
+	if  [ -x "$(command -v yarn)" ]; then
+		yarn config set proxy "http://${proxy}"
+		yarn config set https-proxy "http://${proxy}"  
+	fi
+
 }
 
 function remove {
@@ -27,8 +43,25 @@ function remove {
 	then
 		sudo sed -i "s_Exec=/opt/google/chrome/google-chrome %U --proxy-server=.*_Exec=/opt/google/chrome/google-chrome %U_" /usr/share/applications/google-chrome.desktop
 	fi
+
 	unset http_proxy
 	unset https_proxy
+
+	if  [ -x "$(command -v git)" ]; then
+		git config --global http.proxy ""
+		git config --global https.proxy ""
+	fi
+
+	if  [ -x "$(command -v npm)" ]; then
+		npm config set proxy ""
+		npm config set https-proxy ""  
+	fi
+
+	if  [ -x "$(command -v yarn)" ]; then
+		yarn config set proxy ""
+		yarn config set https-proxy ""  
+	fi
+
 }
 
 if [[ $1 != "" ]]
