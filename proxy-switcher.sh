@@ -28,6 +28,16 @@ function setup {
 		yarn config set proxy "http://${proxy}"
 		yarn config set https-proxy "http://${proxy}"  
 	fi
+	if [ -x "$(command -v docker)" ]; then
+		echo "[Service]\nEnvironment=\"HTTP_PROXY=${proxy}/\"\nEnvironment=\"HTTPS_PROXY=${proxy}/\"\nEnvironment=\"NO_PROXY=localhost,127.0.0.1,localaddress,.localdomain.com\"" | sudo tee /etc/systemd/system/docker.service.d/http-proxy.conf
+		if [ -x $(command -v jq) ]; then
+			cat ~/.docker/config.json | jq --arg newProxy $proxy --arg noProxy "localhost,127.0.0.1,localaddress,.localdomain.com" '. + {proxies:{ default:{ httpProxy: $newProxy, httpsProxy: $newProxy, noProxy: $noProxy }}}' | tee ~/.docker/config.json
+		else
+			echo "You should install jq for handling json files. Run sudo apt install -y jq"
+		fi
+		sudo systemctl daemon-reload
+		sudo service docker restart
+	fi
 
 }
 
@@ -64,6 +74,20 @@ function remove {
 		yarn config set https-proxy ""  
 	fi
 
+	if [ -x "$(command -v docker)" ];then
+		if [ -f /etc/systemd/system/docker.service.d/http-proxy.conf ]; then
+		 sudo rm /etc/systemd/system/docker.service.d/http-proxy.conf
+		 sudo systemctl daemon-reload
+		 sudo service docker restart
+		fi
+		if [ -x "$(command -v jq)" ]; then
+			if [ -f ~/.docker/config.json ]; then
+				cat ~/.docker/config.json | jq 'del(.proxies)' | tee ~/.docker/config.json
+			fi
+		else
+			echo "You should install jq for handling json files. Run sudo apt install -y jq"
+		fi
+	fi
 }
 
 if [[ $1 != "" ]]
